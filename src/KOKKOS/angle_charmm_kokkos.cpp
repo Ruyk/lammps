@@ -153,7 +153,7 @@ void AngleCharmmKokkos<DeviceType>::operator()(TagAngleCharmmCompute<NEWTON_BOND
   const F_FLOAT delz1 = x(i1,2) - x(i2,2);
 
   const F_FLOAT rsq1 = delx1*delx1 + dely1*dely1 + delz1*delz1;
-  const F_FLOAT r1 = sqrt(rsq1);
+  const F_FLOAT r1 = Kokkos::Experimental::sqrt(rsq1);
 
   // 2nd bond
 
@@ -162,7 +162,7 @@ void AngleCharmmKokkos<DeviceType>::operator()(TagAngleCharmmCompute<NEWTON_BOND
   const F_FLOAT delz2 = x(i3,2) - x(i2,2);
 
   const F_FLOAT rsq2 = delx2*delx2 + dely2*dely2 + delz2*delz2;
-  const F_FLOAT r2 = sqrt(rsq2);
+  const F_FLOAT r2 = Kokkos::Experimental::sqrt(rsq2);
 
   // Urey-Bradley bond
 
@@ -171,7 +171,7 @@ void AngleCharmmKokkos<DeviceType>::operator()(TagAngleCharmmCompute<NEWTON_BOND
   const F_FLOAT delzUB = x(i3,2) - x(i1,2);
 
   const F_FLOAT rsqUB = delxUB*delxUB + delyUB*delyUB + delzUB*delzUB;
-  const F_FLOAT rUB = sqrt(rsqUB);
+  const F_FLOAT rUB = Kokkos::Experimental::sqrt(rsqUB);
 
   // Urey-Bradley force & energy
 
@@ -192,13 +192,13 @@ void AngleCharmmKokkos<DeviceType>::operator()(TagAngleCharmmCompute<NEWTON_BOND
   if (c > 1.0) c = 1.0;
   if (c < -1.0) c = -1.0;
 
-  F_FLOAT s = sqrt(1.0 - c*c);
+  F_FLOAT s = Kokkos::Experimental::sqrt(1.0 - c*c);
   if (s < SMALL) s = SMALL;
   s = 1.0/s;
 
   // harmonic force & energy
 
-  const F_FLOAT dtheta = acos(c) - d_theta0[type];
+  const F_FLOAT dtheta = Kokkos::Experimental::acos(c) - d_theta0[type];
   const F_FLOAT tk = d_k[type] * dtheta;
 
   if (eflag) eangle += tk*dtheta;

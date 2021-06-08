@@ -218,7 +218,7 @@ int MinLineSearchKokkos::linemin_quadratic(double eoriginal, double &alpha)
     auto l_h = h;
 
     Kokkos::parallel_reduce(nvec, LAMMPS_LAMBDA(const int& i, double& hme) {
-      hme = MAX(hme,fabs(l_h[i]));
+      hme = MAX(hme,Kokkos::Experimental::fabs(l_h[i]));
     },Kokkos::Max<double>(hme));
   }
   MPI_Allreduce(&hme,&hmaxall,1,MPI_DOUBLE,MPI_MAX,world);
@@ -227,7 +227,7 @@ int MinLineSearchKokkos::linemin_quadratic(double eoriginal, double &alpha)
     double alpha_extra = modify->max_alpha(hextra);
     alphamax = MIN(alphamax,alpha_extra);
     for (int i = 0; i < nextra_global; i++)
-      hmaxall = MAX(hmaxall,fabs(hextra[i]));
+      hmaxall = MAX(hmaxall,Kokkos::Experimental::fabs(hextra[i]));
   }
 
   if (hmaxall == 0.0) return ZEROFORCE;
@@ -302,7 +302,7 @@ int MinLineSearchKokkos::linemin_quadratic(double eoriginal, double &alpha)
 
     // if fh or delfh is epsilon, reset to starting point, exit with error
 
-    if (fabs(fh) < EPS_QUAD || fabs(delfh) < EPS_QUAD) {
+    if (Kokkos::Experimental::fabs(fh) < EPS_QUAD || Kokkos::Experimental::fabs(delfh) < EPS_QUAD) {
       ecurrent = alpha_step(0.0,0);
       return ZEROQUAD;
     }
@@ -310,7 +310,7 @@ int MinLineSearchKokkos::linemin_quadratic(double eoriginal, double &alpha)
     // Check if ready for quadratic projection, equivalent to secant method
     // alpha0 = projected alpha
 
-    relerr = fabs(1.0-(0.5*(alpha-alphaprev)*(fh+fhprev)+ecurrent)/engprev);
+    relerr = Kokkos::Experimental::fabs(1.0-(0.5*(alpha-alphaprev)*(fh+fhprev)+ecurrent)/engprev);
     alpha0 = alpha - (alpha-alphaprev)*fh/delfh;
 
     if (relerr <= QUADRATIC_TOL && alpha0 > 0.0 && alpha0 < alphamax) {

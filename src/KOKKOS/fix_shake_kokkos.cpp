@@ -640,10 +640,10 @@ void FixShakeKokkos<DeviceType>::shake(int m, EV_FLOAT& ev) const
   // exact quadratic solution for lamda
 
   double lamda,lamda1,lamda2;
-  lamda1 = (-b+sqrt(determ)) / (2.0*a);
-  lamda2 = (-b-sqrt(determ)) / (2.0*a);
+  lamda1 = (-b+Kokkos::Experimental::sqrt(determ)) / (2.0*a);
+  lamda2 = (-b-Kokkos::Experimental::sqrt(determ)) / (2.0*a);
 
-  if (fabs(lamda1) <= fabs(lamda2)) lamda = lamda1;
+  if (Kokkos::Experimental::fabs(lamda1) <= Kokkos::Experimental::fabs(lamda2)) lamda = lamda1;
   else lamda = lamda2;
 
   // update forces if atom is owned by this processor
@@ -807,8 +807,8 @@ void FixShakeKokkos<DeviceType>::shake3(int m, EV_FLOAT& ev) const
     lamda02_new = a21inv*b1 + a22inv*b2;
 
     done = 1;
-    if (fabs(lamda01_new-lamda01) > tolerance) done = 0;
-    if (fabs(lamda02_new-lamda02) > tolerance) done = 0;
+    if (Kokkos::Experimental::fabs(lamda01_new-lamda01) > tolerance) done = 0;
+    if (Kokkos::Experimental::fabs(lamda02_new-lamda02) > tolerance) done = 0;
 
     lamda01 = lamda01_new;
     lamda02 = lamda02_new;
@@ -816,7 +816,7 @@ void FixShakeKokkos<DeviceType>::shake3(int m, EV_FLOAT& ev) const
     // stop iterations before we have a floating point overflow
     // max double is < 1.0e308, so 1e150 is a reasonable cutoff
 
-    if (fabs(lamda01) > 1e150 || fabs(lamda02) > 1e150) done = 1;
+    if (Kokkos::Experimental::fabs(lamda01) > 1e150 || Kokkos::Experimental::fabs(lamda02) > 1e150) done = 1;
 
     niter++;
   }
@@ -1058,9 +1058,9 @@ void FixShakeKokkos<DeviceType>::shake4(int m, EV_FLOAT& ev) const
     lamda03_new = a31inv*b1 + a32inv*b2 + a33inv*b3;
 
     done = 1;
-    if (fabs(lamda01_new-lamda01) > tolerance) done = 0;
-    if (fabs(lamda02_new-lamda02) > tolerance) done = 0;
-    if (fabs(lamda03_new-lamda03) > tolerance) done = 0;
+    if (Kokkos::Experimental::fabs(lamda01_new-lamda01) > tolerance) done = 0;
+    if (Kokkos::Experimental::fabs(lamda02_new-lamda02) > tolerance) done = 0;
+    if (Kokkos::Experimental::fabs(lamda03_new-lamda03) > tolerance) done = 0;
 
     lamda01 = lamda01_new;
     lamda02 = lamda02_new;
@@ -1069,8 +1069,8 @@ void FixShakeKokkos<DeviceType>::shake4(int m, EV_FLOAT& ev) const
     // stop iterations before we have a floating point overflow
     // max double is < 1.0e308, so 1e150 is a reasonable cutoff
 
-    if (fabs(lamda01) > 1e150 || fabs(lamda02) > 1e150
-        || fabs(lamda03) > 1e150) done = 1;
+    if (Kokkos::Experimental::fabs(lamda01) > 1e150 || Kokkos::Experimental::fabs(lamda02) > 1e150
+        || Kokkos::Experimental::fabs(lamda03) > 1e150) done = 1;
 
     niter++;
   }
@@ -1318,9 +1318,9 @@ void FixShakeKokkos<DeviceType>::shake3angle(int m, EV_FLOAT& ev) const
     lamda12_new = a31inv*b1 + a32inv*b2 + a33inv*b3;
 
     done = 1;
-    if (fabs(lamda01_new-lamda01) > tolerance) done = 0;
-    if (fabs(lamda02_new-lamda02) > tolerance) done = 0;
-    if (fabs(lamda12_new-lamda12) > tolerance) done = 0;
+    if (Kokkos::Experimental::fabs(lamda01_new-lamda01) > tolerance) done = 0;
+    if (Kokkos::Experimental::fabs(lamda02_new-lamda02) > tolerance) done = 0;
+    if (Kokkos::Experimental::fabs(lamda12_new-lamda12) > tolerance) done = 0;
 
     lamda01 = lamda01_new;
     lamda02 = lamda02_new;
@@ -1329,8 +1329,8 @@ void FixShakeKokkos<DeviceType>::shake3angle(int m, EV_FLOAT& ev) const
     // stop iterations before we have a floating point overflow
     // max double is < 1.0e308, so 1e150 is a reasonable cutoff
 
-    if (fabs(lamda01) > 1e150 || fabs(lamda02) > 1e150
-        || fabs(lamda12) > 1e150) done = 1;
+    if (Kokkos::Experimental::fabs(lamda01) > 1e150 || Kokkos::Experimental::fabs(lamda02) > 1e150
+        || Kokkos::Experimental::fabs(lamda12) > 1e150) done = 1;
 
     niter++;
   }
@@ -1784,19 +1784,19 @@ void FixShakeKokkos<DeviceType>::minimum_image(double *delta) const
 {
   if (triclinic == 0) {
     if (xperiodic) {
-      while (fabs(delta[0]) > xprd_half) {
+      while (Kokkos::Experimental::fabs(delta[0]) > xprd_half) {
         if (delta[0] < 0.0) delta[0] += xprd;
         else delta[0] -= xprd;
       }
     }
     if (yperiodic) {
-      while (fabs(delta[1]) > yprd_half) {
+      while (Kokkos::Experimental::fabs(delta[1]) > yprd_half) {
         if (delta[1] < 0.0) delta[1] += yprd;
         else delta[1] -= yprd;
       }
     }
     if (zperiodic) {
-      while (fabs(delta[2]) > zprd_half) {
+      while (Kokkos::Experimental::fabs(delta[2]) > zprd_half) {
         if (delta[2] < 0.0) delta[2] += zprd;
         else delta[2] -= zprd;
       }
@@ -1804,7 +1804,7 @@ void FixShakeKokkos<DeviceType>::minimum_image(double *delta) const
 
   } else {
     if (zperiodic) {
-      while (fabs(delta[2]) > zprd_half) {
+      while (Kokkos::Experimental::fabs(delta[2]) > zprd_half) {
         if (delta[2] < 0.0) {
           delta[2] += zprd;
           delta[1] += yz;
@@ -1817,7 +1817,7 @@ void FixShakeKokkos<DeviceType>::minimum_image(double *delta) const
       }
     }
     if (yperiodic) {
-      while (fabs(delta[1]) > yprd_half) {
+      while (Kokkos::Experimental::fabs(delta[1]) > yprd_half) {
         if (delta[1] < 0.0) {
           delta[1] += yprd;
           delta[0] += xy;
@@ -1828,7 +1828,7 @@ void FixShakeKokkos<DeviceType>::minimum_image(double *delta) const
       }
     }
     if (xperiodic) {
-      while (fabs(delta[0]) > xprd_half) {
+      while (Kokkos::Experimental::fabs(delta[0]) > xprd_half) {
         if (delta[0] < 0.0) delta[0] += xprd;
         else delta[0] -= xprd;
       }
@@ -1851,19 +1851,19 @@ void FixShakeKokkos<DeviceType>::minimum_image_once(double *delta) const
 {
   if (triclinic == 0) {
     if (xperiodic) {
-      if (fabs(delta[0]) > xprd_half) {
+      if (Kokkos::Experimental::fabs(delta[0]) > xprd_half) {
         if (delta[0] < 0.0) delta[0] += xprd;
         else delta[0] -= xprd;
       }
     }
     if (yperiodic) {
-      if (fabs(delta[1]) > yprd_half) {
+      if (Kokkos::Experimental::fabs(delta[1]) > yprd_half) {
         if (delta[1] < 0.0) delta[1] += yprd;
         else delta[1] -= yprd;
       }
     }
     if (zperiodic) {
-      if (fabs(delta[2]) > zprd_half) {
+      if (Kokkos::Experimental::fabs(delta[2]) > zprd_half) {
         if (delta[2] < 0.0) delta[2] += zprd;
         else delta[2] -= zprd;
       }
@@ -1871,7 +1871,7 @@ void FixShakeKokkos<DeviceType>::minimum_image_once(double *delta) const
 
   } else {
     if (zperiodic) {
-      if (fabs(delta[2]) > zprd_half) {
+      if (Kokkos::Experimental::fabs(delta[2]) > zprd_half) {
         if (delta[2] < 0.0) {
           delta[2] += zprd;
           delta[1] += yz;
@@ -1884,7 +1884,7 @@ void FixShakeKokkos<DeviceType>::minimum_image_once(double *delta) const
       }
     }
     if (yperiodic) {
-      if (fabs(delta[1]) > yprd_half) {
+      if (Kokkos::Experimental::fabs(delta[1]) > yprd_half) {
         if (delta[1] < 0.0) {
           delta[1] += yprd;
           delta[0] += xy;
@@ -1895,7 +1895,7 @@ void FixShakeKokkos<DeviceType>::minimum_image_once(double *delta) const
       }
     }
     if (xperiodic) {
-      if (fabs(delta[0]) > xprd_half) {
+      if (Kokkos::Experimental::fabs(delta[0]) > xprd_half) {
         if (delta[0] < 0.0) delta[0] += xprd;
         else delta[0] -= xprd;
       }

@@ -306,7 +306,7 @@ void FixEOStableRXKokkos<DeviceType>::energy_lookup(int id, double thetai, doubl
   if (rx_flag) {
     for (int ispecies = 0; ispecies < nspecies; ispecies++) {
       nTotal += dvector(ispecies,id);
-      if (fabs(d_moleculeCorrCoeff[ispecies]) > tolerance) {
+      if (Kokkos::Experimental::fabs(d_moleculeCorrCoeff[ispecies]) > tolerance) {
         nPG++;
         nTotalPG += dvector(ispecies,id);
       }
@@ -384,7 +384,7 @@ void FixEOStableRXKokkos<DeviceType>::temperature_lookup(int id, double ui, doub
 
   // Apply the Secant Method
   for (it=0; it<maxit; it++) {
-    if (fabs(f2-f1) < MY_EPSILON) {
+    if (Kokkos::Experimental::fabs(f2-f1) < MY_EPSILON) {
       if (std::isnan(f1) || std::isnan(f2)) k_error_flag.template view<DeviceType>()() = 2;
       temp = t1;
       temp = MAX(temp,lo);
@@ -393,7 +393,7 @@ void FixEOStableRXKokkos<DeviceType>::temperature_lookup(int id, double ui, doub
       break;
     }
     temp = t2 - f2*(t2-t1)/(f2-f1);
-    if (fabs(temp-t2) < tolerance) break;
+    if (Kokkos::Experimental::fabs(temp-t2) < tolerance) break;
     f1 = f2;
     t1 = t2;
     t2 = temp;

@@ -122,19 +122,19 @@ void FixMinimizeKokkos::reset_coords()
       {
         if (triclinic == 0) {
           if (xperiodic) {
-            if (fabs(dx) > xprd_half) {
+            if (Kokkos::Experimental::fabs(dx) > xprd_half) {
               if (dx < 0.0) dx += xprd;
               else dx -= xprd;
             }
           }
           if (yperiodic) {
-            if (fabs(dy) > yprd_half) {
+            if (Kokkos::Experimental::fabs(dy) > yprd_half) {
               if (dy < 0.0) dy += yprd;
               else dy -= yprd;
             }
           }
           if (zperiodic) {
-            if (fabs(dz) > zprd_half) {
+            if (Kokkos::Experimental::fabs(dz) > zprd_half) {
               if (dz < 0.0) dz += zprd;
               else dz -= zprd;
             }
@@ -142,7 +142,7 @@ void FixMinimizeKokkos::reset_coords()
 
         } else {
           if (zperiodic) {
-            if (fabs(dz) > zprd_half) {
+            if (Kokkos::Experimental::fabs(dz) > zprd_half) {
               if (dz < 0.0) {
                 dz += zprd;
                 dy += yz;
@@ -155,7 +155,7 @@ void FixMinimizeKokkos::reset_coords()
             }
           }
           if (yperiodic) {
-            if (fabs(dy) > yprd_half) {
+            if (Kokkos::Experimental::fabs(dy) > yprd_half) {
               if (dy < 0.0) {
                 dy += yprd;
                 dx += xy;
@@ -166,7 +166,7 @@ void FixMinimizeKokkos::reset_coords()
             }
           }
           if (xperiodic) {
-            if (fabs(dx) > xprd_half) {
+            if (Kokkos::Experimental::fabs(dx) > xprd_half) {
               if (dx < 0.0) dx += xprd;
               else dx -= xprd;
             }

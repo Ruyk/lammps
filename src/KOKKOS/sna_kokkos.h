@@ -171,15 +171,15 @@ inline
   static KOKKOS_FORCEINLINE_FUNCTION
   void sincos_wrapper(double x, double* sin_, double *cos_) {
 #ifdef __SYCL_DEVICE_ONLY__
-    *sin_ = sycl::sincos(x, cos_);
+    *sin_ = sycl::sinKokkos::Experimental::cos(x, cos_);
 #else
-    sincos(x, sin_, cos_);
+    sinKokkos::Experimental::cos(x, sin_, cos_);
 #endif
   }
   static KOKKOS_FORCEINLINE_FUNCTION
   void sincos_wrapper(float x, float* sin_, float *cos_) {
 #ifdef __SYCL_DEVICE_ONLY__
-    *sin_ = sycl::sincos(x, cos_);
+    *sin_ = sycl::sinKokkos::Experimental::cos(x, cos_);
 #else
     sincosf(x, sin_, cos_);
 #endif

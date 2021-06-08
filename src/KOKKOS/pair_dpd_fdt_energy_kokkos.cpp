@@ -198,7 +198,7 @@ void PairDPDfdtEnergyKokkos<DeviceType>::compute(int eflag_in, int vflag_in)
   nlocal = atom->nlocal;
   int nghost = atom->nghost;
   int newton_pair = force->newton_pair;
-  dtinvsqrt = 1.0/sqrt(update->dt);
+  dtinvsqrt = 1.0/Kokkos::Experimental::sqrt(update->dt);
 
   int inum = list->inum;
   NeighListKokkos<DeviceType>* k_list = static_cast<NeighListKokkos<DeviceType>*>(list);
@@ -421,7 +421,7 @@ void PairDPDfdtEnergyKokkos<DeviceType>::operator()(TagPairDPDfdtEnergyComputeSp
 
     double cutsq_ij = STACKPARAMS?m_cutsq[itype][jtype]:d_cutsq(itype,jtype);
     if (rsq < cutsq_ij) {
-      r = sqrt(rsq);
+      r = Kokkos::Experimental::sqrt(rsq);
       if (r < EPSILON) continue;     // r can be 0.0 in DPD systems
       rinv = 1.0/r;
       double cut_ij = STACKPARAMS?m_params[itype][jtype].cut:params(itype,jtype).cut;
@@ -519,7 +519,7 @@ void PairDPDfdtEnergyKokkos<DeviceType>::operator()(TagPairDPDfdtEnergyComputeNo
 
     double cutsq_ij = STACKPARAMS?m_cutsq[itype][jtype]:d_cutsq(itype,jtype);
     if (rsq < cutsq_ij) {
-      r = sqrt(rsq);
+      r = Kokkos::Experimental::sqrt(rsq);
       if (r < EPSILON) continue;     // r can be 0.0 in DPD systems
       rinv = 1.0/r;
       double cut_ij = STACKPARAMS?m_params[itype][jtype].cut:params(itype,jtype).cut;

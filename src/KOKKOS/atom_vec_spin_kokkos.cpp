@@ -1070,7 +1070,7 @@ void AtomVecSpinKokkos::data_atom(double *coord, imageint imagetmp,
   h_sp(nlocal,0) = utils::numeric(FLERR,values[6],true,lmp);
   h_sp(nlocal,1) = utils::numeric(FLERR,values[7],true,lmp);
   h_sp(nlocal,2) = utils::numeric(FLERR,values[8],true,lmp);
-  double inorm = 1.0/sqrt(sp[nlocal][0]*sp[nlocal][0] +
+  double inorm = 1.0/Kokkos::Experimental::sqrt(sp[nlocal][0]*sp[nlocal][0] +
                           sp[nlocal][1]*sp[nlocal][1] +
                           sp[nlocal][2]*sp[nlocal][2]);
   h_sp(nlocal,0) *= inorm;
@@ -1104,7 +1104,7 @@ int AtomVecSpinKokkos::data_atom_hybrid(int nlocal, char **values)
   h_sp(nlocal,0) = utils::numeric(FLERR,values[1],true,lmp);
   h_sp(nlocal,1) = utils::numeric(FLERR,values[2],true,lmp);
   h_sp(nlocal,2) = utils::numeric(FLERR,values[3],true,lmp);
-  double inorm = 1.0/sqrt(sp[nlocal][0]*sp[nlocal][0] +
+  double inorm = 1.0/Kokkos::Experimental::sqrt(sp[nlocal][0]*sp[nlocal][0] +
                           sp[nlocal][1]*sp[nlocal][1] +
                           sp[nlocal][2]*sp[nlocal][2]);
   sp[nlocal][0] *= inorm;

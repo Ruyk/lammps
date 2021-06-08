@@ -184,9 +184,9 @@ void ImproperHarmonicKokkos<DeviceType>::operator()(TagImproperHarmonicCompute<N
   const F_FLOAT ss2 = 1.0 / (vb2x*vb2x + vb2y*vb2y + vb2z*vb2z);
   const F_FLOAT ss3 = 1.0 / (vb3x*vb3x + vb3y*vb3y + vb3z*vb3z);
 
-  const F_FLOAT r1 = sqrt(ss1);
-  const F_FLOAT r2 = sqrt(ss2);
-  const F_FLOAT r3 = sqrt(ss3);
+  const F_FLOAT r1 = Kokkos::Experimental::sqrt(ss1);
+  const F_FLOAT r2 = Kokkos::Experimental::sqrt(ss2);
+  const F_FLOAT r3 = Kokkos::Experimental::sqrt(ss3);
 
   // sin and cos of improper
 
@@ -202,7 +202,7 @@ void ImproperHarmonicKokkos<DeviceType>::operator()(TagImproperHarmonicCompute<N
   if (s2 < SMALL) s2 = SMALL;
   s2 = 1.0 / s2;
 
-  F_FLOAT s12 = sqrt(s1*s2);
+  F_FLOAT s12 = Kokkos::Experimental::sqrt(s1*s2);
   F_FLOAT c = (c1*c2 + c0) * s12;
 
   // error check
@@ -213,12 +213,12 @@ void ImproperHarmonicKokkos<DeviceType>::operator()(TagImproperHarmonicCompute<N
   if (c > 1.0) c = 1.0;
   if (c < -1.0) c = -1.0;
 
-  F_FLOAT s = sqrt(1.0 - c*c);
+  F_FLOAT s = Kokkos::Experimental::sqrt(1.0 - c*c);
   if (s < SMALL) s = SMALL;
 
   // force & energy
 
-  const F_FLOAT domega = acos(c) - d_chi[type];
+  const F_FLOAT domega = Kokkos::Experimental::acos(c) - d_chi[type];
   F_FLOAT a = d_k[type] * domega;
 
   F_FLOAT eimproper = 0.0;

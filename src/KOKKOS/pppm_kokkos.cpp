@@ -141,7 +141,7 @@ template<class DeviceType>
 void PPPMKokkos<DeviceType>::settings(int narg, char **arg)
 {
   if (narg < 1) error->all(FLERR,"Illegal kspace_style pppm/kk command");
-  accuracy_relative = fabs(utils::numeric(FLERR,arg[0],false,lmp));
+  accuracy_relative = Kokkos::Experimental::fabs(utils::numeric(FLERR,arg[0],false,lmp));
 }
 
 /* ----------------------------------------------------------------------
@@ -936,9 +936,9 @@ void PPPMKokkos<DeviceType>::set_grid_global()
       error->all(FLERR,"KSpace accuracy must be > 0");
     if (q2 == 0.0)
       error->all(FLERR,"Must use 'kspace_modify gewald' for uncharged system");
-    g_ewald = accuracy*sqrt(natoms*cutoff*xprd*yprd*zprd) / (2.0*q2);
+    g_ewald = accuracy*Kokkos::Experimental::sqrt(natoms*cutoff*xprd*yprd*zprd) / (2.0*q2);
     if (g_ewald >= 1.0) g_ewald = (1.35 - 0.15*log(accuracy))/cutoff;
-    else g_ewald = sqrt(-log(g_ewald)) / cutoff;
+    else g_ewald = Kokkos::Experimental::sqrt(-log(g_ewald)) / cutoff;
   }
 
   // set optimal nx_pppm,ny_pppm,nz_pppm based on order and accuracy
@@ -1053,7 +1053,7 @@ double PPPMKokkos<DeviceType>::compute_df_kspace()
   double lprx = estimate_ik_error(h_x,xprd,natoms);
   double lpry = estimate_ik_error(h_y,yprd,natoms);
   double lprz = estimate_ik_error(h_z,zprd_slab,natoms);
-  df_kspace = sqrt(lprx*lprx + lpry*lpry + lprz*lprz) / sqrt(3.0);
+  df_kspace = Kokkos::Experimental::sqrt(lprx*lprx + lpry*lpry + lprz*lprz) / Kokkos::Experimental::sqrt(3.0);
   return df_kspace;
 }
 
@@ -1066,9 +1066,9 @@ double PPPMKokkos<DeviceType>::estimate_ik_error(double h, double prd, bigint na
 {
   double sum = 0.0;
   for (int m = 0; m < order; m++)
-    sum += acons(order,m) * pow(h*g_ewald,2.0*m);
-  double value = q2 * pow(h*g_ewald,(double)order) *
-    sqrt(g_ewald*prd*sqrt(MY_2PI)*sum/natoms) / (prd*prd);
+    sum += acons(order,m) * Kokkos::Experimental::pow(h*g_ewald,2.0*m);
+  double value = q2 * Kokkos::Experimental::pow(h*g_ewald,(double)order) *
+    Kokkos::Experimental::sqrt(g_ewald*prd*Kokkos::Experimental::sqrt(MY_2PI)*sum/natoms) / (prd*prd);
 
   return value;
 }
@@ -1086,7 +1086,7 @@ void PPPMKokkos<DeviceType>::adjust_gewald()
   for (int i = 0; i < LARGE; i++) {
     dx = newton_raphson_f() / derivf();
     g_ewald -= dx;
-    if (fabs(newton_raphson_f()) < SMALL) return;
+    if (Kokkos::Experimental::fabs(newton_raphson_f()) < SMALL) return;
   }
 
   char str[128];
@@ -1106,8 +1106,8 @@ double PPPMKokkos<DeviceType>::newton_raphson_f()
   double zprd = domain->zprd;
   bigint natoms = atomKK->natoms;
 
-  double df_rspace = 2.0*q2*exp(-g_ewald*g_ewald*cutoff*cutoff) /
-       sqrt(natoms*cutoff*xprd*yprd*zprd);
+  double df_rspace = 2.0*q2*Kokkos::Experimental::exp(-g_ewald*g_ewald*cutoff*cutoff) /
+       Kokkos::Experimental::sqrt(natoms*cutoff*xprd*yprd*zprd);
 
   double df_kspace = compute_df_kspace();
 
@@ -1149,10 +1149,10 @@ double PPPMKokkos<DeviceType>::final_accuracy()
   if (natoms == 0) natoms = 1; // avoid division by zero
 
   double df_kspace = compute_df_kspace();
-  double q2_over_sqrt = q2 / sqrt(natoms*cutoff*xprd*yprd*zprd);
-  double df_rspace = 2.0 * q2_over_sqrt * exp(-g_ewald*g_ewald*cutoff*cutoff);
+  double q2_over_sqrt = q2 / Kokkos::Experimental::sqrt(natoms*cutoff*xprd*yprd*zprd);
+  double df_rspace = 2.0 * q2_over_sqrt * Kokkos::Experimental::exp(-g_ewald*g_ewald*cutoff*cutoff);
   double df_table = estimate_table_accuracy(q2_over_sqrt,df_rspace);
-  double estimated_accuracy = sqrt(df_kspace*df_kspace + df_rspace*df_rspace +
+  double estimated_accuracy = Kokkos::Experimental::sqrt(df_kspace*df_kspace + df_rspace*df_rspace +
                                    df_table*df_table);
 
   return estimated_accuracy;
@@ -1220,11 +1220,11 @@ void PPPMKokkos<DeviceType>::compute_gf_ik()
   unitkz = (MY_2PI/zprd_slab);
 
   nbx = static_cast<int> ((g_ewald*xprd/(MY_PI*nx_pppm)) *
-                          pow(-log(EPS_HOC),0.25));
+                          Kokkos::Experimental::pow(-log(EPS_HOC),0.25));
   nby = static_cast<int> ((g_ewald*yprd/(MY_PI*ny_pppm)) *
-                          pow(-log(EPS_HOC),0.25));
+                          Kokkos::Experimental::pow(-log(EPS_HOC),0.25));
   nbz = static_cast<int> ((g_ewald*zprd_slab/(MY_PI*nz_pppm)) *
-                          pow(-log(EPS_HOC),0.25));
+                          Kokkos::Experimental::pow(-log(EPS_HOC),0.25));
   twoorder = 2*order;
 
   // merge three outer loops into one for better threading
@@ -1251,13 +1251,13 @@ void PPPMKokkos<DeviceType>::operator()(TagPPPM_compute_gf_ik, const int &n) con
   k += nxlo_fft;
 
   const int mper = m - nz_pppm*(2*m/nz_pppm);
-  const double snz = square(sin(0.5*unitkz*mper*zprd_slab/nz_pppm));
+  const double snz = square(Kokkos::Experimental::sin(0.5*unitkz*mper*zprd_slab/nz_pppm));
 
   const int lper = l - ny_pppm*(2*l/ny_pppm);
-  const double sny = square(sin(0.5*unitky*lper*yprd/ny_pppm));
+  const double sny = square(Kokkos::Experimental::sin(0.5*unitky*lper*yprd/ny_pppm));
 
   const int kper = k - nx_pppm*(2*k/nx_pppm);
-  const double snx = square(sin(0.5*unitkx*kper*xprd/nx_pppm));
+  const double snx = square(Kokkos::Experimental::sin(0.5*unitkx*kper*xprd/nx_pppm));
 
   const double sqk = square(unitkx*kper) + square(unitky*lper) + square(unitkz*mper);
 
@@ -1268,19 +1268,19 @@ void PPPMKokkos<DeviceType>::operator()(TagPPPM_compute_gf_ik, const int &n) con
 
     for (int nx = -nbx; nx <= nbx; nx++) {
       const double qx = unitkx*(kper+nx_pppm*nx);
-      const double sx = exp(-0.25*square(qx/g_ewald));
+      const double sx = Kokkos::Experimental::exp(-0.25*square(qx/g_ewald));
       const double argx = 0.5*qx*xprd/nx_pppm;
       const double wx = powsinxx(argx,twoorder);
 
       for (int ny = -nby; ny <= nby; ny++) {
         const double qy = unitky*(lper+ny_pppm*ny);
-        const double sy = exp(-0.25*square(qy/g_ewald));
+        const double sy = Kokkos::Experimental::exp(-0.25*square(qy/g_ewald));
         const double argy = 0.5*qy*yprd/ny_pppm;
         const double wy = powsinxx(argy,twoorder);
 
         for (int nz = -nbz; nz <= nbz; nz++) {
           const double qz = unitkz*(mper+nz_pppm*nz);
-          const double sz = exp(-0.25*square(qz/g_ewald));
+          const double sz = Kokkos::Experimental::exp(-0.25*square(qz/g_ewald));
           const double argz = 0.5*qz*zprd_slab/nz_pppm;
           const double wz = powsinxx(argz,twoorder);
 
@@ -1303,9 +1303,9 @@ template<class DeviceType>
 void PPPMKokkos<DeviceType>::compute_gf_ik_triclinic()
 {
   double tmp[3];
-  tmp[0] = (g_ewald/(MY_PI*nx_pppm)) * pow(-log(EPS_HOC),0.25);
-  tmp[1] = (g_ewald/(MY_PI*ny_pppm)) * pow(-log(EPS_HOC),0.25);
-  tmp[2] = (g_ewald/(MY_PI*nz_pppm)) * pow(-log(EPS_HOC),0.25);
+  tmp[0] = (g_ewald/(MY_PI*nx_pppm)) * Kokkos::Experimental::pow(-log(EPS_HOC),0.25);
+  tmp[1] = (g_ewald/(MY_PI*ny_pppm)) * Kokkos::Experimental::pow(-log(EPS_HOC),0.25);
+  tmp[2] = (g_ewald/(MY_PI*nz_pppm)) * Kokkos::Experimental::pow(-log(EPS_HOC),0.25);
   lamda2xT(&tmp[0],&tmp[0]);
   nbx = static_cast<int> (tmp[0]);
   nby = static_cast<int> (tmp[1]);
@@ -1325,15 +1325,15 @@ void PPPMKokkos<DeviceType>::operator()(TagPPPM_compute_gf_ik_triclinic, const i
   //int n = (m - nzlo_fft)*(nyhi_fft+1 - nylo_fft)*(nxhi_fft+1 - nxlo_fft);
   //
   //const int mper = m - nz_pppm*(2*m/nz_pppm);
-  //const double snz = square(sin(MY_PI*mper/nz_pppm));
+  //const double snz = square(Kokkos::Experimental::sin(MY_PI*mper/nz_pppm));
   //
   //for (int l = nylo_fft; l <= nyhi_fft; l++) {
   //  const int lper = l - ny_pppm*(2*l/ny_pppm);
-  //  const double sny = square(sin(MY_PI*lper/ny_pppm));
+  //  const double sny = square(Kokkos::Experimental::sin(MY_PI*lper/ny_pppm));
   //
   //  for (int k = nxlo_fft; k <= nxhi_fft; k++) {
   //    const int kper = k - nx_pppm*(2*k/nx_pppm);
-  //    const double snx = square(sin(MY_PI*kper/nx_pppm));
+  //    const double snx = square(Kokkos::Experimental::sin(MY_PI*kper/nx_pppm));
   //
   //    double unitk_lamda[3];
   //    unitk_lamda[0] = 2.0*MY_PI*kper;
@@ -1367,13 +1367,13 @@ void PPPMKokkos<DeviceType>::operator()(TagPPPM_compute_gf_ik_triclinic, const i
   //            x2lamdaT(&b[0],&b[0]);
   //
   //            const double qx = unitk_lamda[0]+b[0];
-  //            const double sx = exp(-0.25*square(qx/g_ewald));
+  //            const double sx = Kokkos::Experimental::exp(-0.25*square(qx/g_ewald));
   //
   //            const double qy = unitk_lamda[1]+b[1];
-  //            const double sy = exp(-0.25*square(qy/g_ewald));
+  //            const double sy = Kokkos::Experimental::exp(-0.25*square(qy/g_ewald));
   //
   //            const double qz = unitk_lamda[2]+b[2];
-  //            const double sz = exp(-0.25*square(qz/g_ewald));
+  //            const double sz = Kokkos::Experimental::exp(-0.25*square(qz/g_ewald));
   //
   //            const double dot1 = unitk_lamda[0]*qx + unitk_lamda[1]*qy + unitk_lamda[2]*qz;
   //            const double dot2 = qx*qx+qy*qy+qz*qz;
@@ -2654,7 +2654,7 @@ void PPPMKokkos<DeviceType>::compute_rho1d(const int i, const FFT_SCALAR &dx, co
       k is odd integers if n is even and even integers if n is odd
               ---
              | n-1
-             | Sum a(l,j)*(x-k/2)**l   if abs(x-k/2) < 1/2
+             | Sum a(l,j)*(x-k/2)**l   if Kokkos::Experimental::abs(x-k/2) < 1/2
   wn(k,x) = <  l=0
              |
              |  0                       otherwise
@@ -2687,8 +2687,8 @@ void PPPMKokkos<DeviceType>::compute_rho_coeff()
         s += powf(0.5,(float) l+1) *
           (a[l][k-1+order] + powf(-1.0,(float) l) * a[l][k+1+order]) / (l+1);
 #else
-        s += pow(0.5,(double) l+1) *
-          (a[l][k-1+order] + pow(-1.0,(double) l) * a[l][k+1+order]) / (l+1);
+        s += Kokkos::Experimental::pow(0.5,(double) l+1) *
+          (a[l][k-1+order] + Kokkos::Experimental::pow(-1.0,(double) l) * a[l][k+1+order]) / (l+1);
 #endif
       }
       a[0][k+order] = s;
@@ -2733,7 +2733,7 @@ void PPPMKokkos<DeviceType>::slabcorr()
   //  per-atom energy translationally invariant
 
   dipole_r2 = 0.0;
-  if (eflag_atom || fabs(qsum) > SMALL) {
+  if (eflag_atom || Kokkos::Experimental::fabs(qsum) > SMALL) {
     copymode = 1;
     Kokkos::parallel_reduce(Kokkos::RangePolicy<DeviceType, TagPPPM_slabcorr2>(0,nlocal),*this,dipole_r2);
     copymode = 0;

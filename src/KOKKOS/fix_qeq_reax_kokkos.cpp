@@ -141,7 +141,7 @@ void FixQEqReaxKokkos<DeviceType>::init_shielding_k()
 
   for (i = 1; i <= ntypes; ++i)
     for (j = 1; j <= ntypes; ++j)
-      k_shield.h_view(i,j) = pow( gamma[i] * gamma[j], -1.5 );
+      k_shield.h_view(i,j) = Kokkos::Experimental::pow( gamma[i] * gamma[j], -1.5 );
 
   k_shield.template modify<LMPHostType>();
   k_shield.template sync<DeviceType>();
@@ -454,7 +454,7 @@ void FixQEqReaxKokkos<DeviceType>::compute_h_item(int ii, int &m_fill, const boo
       if (rsq > cutsq) continue;
 
       if (final) {
-        const F_FLOAT r = sqrt(rsq);
+        const F_FLOAT r = Kokkos::Experimental::sqrt(rsq);
         d_jlist(m_fill) = j;
         const F_FLOAT shldij = d_shield(itype,jtype);
         d_val(m_fill) = calculate_H_k(r,shldij);
@@ -640,7 +640,7 @@ void FixQEqReaxKokkos<DeviceType>::compute_h_team(
                       if (valid) {
                         s_jlist(team.team_rank(), idx) = j;
                         s_jtype(team.team_rank(), idx) = jtype;
-                        s_r(team.team_rank(), idx) = sqrt(rsq);
+                        s_r(team.team_rank(), idx) = Kokkos::Experimental::sqrt(rsq);
                         m_fill++;
                       }
                     }
@@ -695,7 +695,7 @@ double FixQEqReaxKokkos<DeviceType>::calculate_H_k(const F_FLOAT &r, const F_FLO
   taper = taper * r + d_tap[0];
 
   denom = r * r * r + shld;
-  denom = pow(denom,0.3333333333333);
+  denom = Kokkos::Experimental::pow(denom,0.3333333333333);
 
   return taper * EV_TO_KCAL_PER_MOL / denom;
 }
@@ -764,7 +764,7 @@ void FixQEqReaxKokkos<DeviceType>::cg_solve1()
   Kokkos::parallel_reduce(inum,norm1_functor,my_norm);
   F_FLOAT norm_sqr = 0.0;
   MPI_Allreduce( &my_norm, &norm_sqr, 1, MPI_DOUBLE, MPI_SUM, world );
-  b_norm = sqrt(norm_sqr);
+  b_norm = Kokkos::Experimental::sqrt(norm_sqr);
 
   // sig_new = parallel_dot( r, d, nn);
   F_FLOAT my_dot = 0.0;
@@ -775,7 +775,7 @@ void FixQEqReaxKokkos<DeviceType>::cg_solve1()
   F_FLOAT sig_new = dot_sqr;
 
   int loop;
-  for (loop = 1; (loop < imax) && (sqrt(sig_new)/b_norm > tolerance); loop++) {
+  for (loop = 1; (loop < imax) && (Kokkos::Experimental::sqrt(sig_new)/b_norm > tolerance); loop++) {
 
     // comm->forward_comm_fix(this); //Dist_vector( d );
     pack_flag = 1;
@@ -842,7 +842,7 @@ void FixQEqReaxKokkos<DeviceType>::cg_solve1()
   if (loop >= imax && comm->me == 0) {
     char str[128];
     sprintf(str,"Fix qeq/reax cg_solve1 convergence failed after %d iterations "
-            "at " BIGINT_FORMAT " step: %f",loop,update->ntimestep,sqrt(sig_new)/b_norm);
+            "at " BIGINT_FORMAT " step: %f",loop,update->ntimestep,Kokkos::Experimental::sqrt(sig_new)/b_norm);
     error->warning(FLERR,str);
     //error->all(FLERR,str);
   }
@@ -896,7 +896,7 @@ void FixQEqReaxKokkos<DeviceType>::cg_solve2()
   Kokkos::parallel_reduce(inum,norm2_functor,my_norm);
   F_FLOAT norm_sqr = 0.0;
   MPI_Allreduce( &my_norm, &norm_sqr, 1, MPI_DOUBLE, MPI_SUM, world );
-  b_norm = sqrt(norm_sqr);
+  b_norm = Kokkos::Experimental::sqrt(norm_sqr);
 
   // sig_new = parallel_dot( r, d, nn);
   F_FLOAT my_dot = 0.0;
@@ -907,7 +907,7 @@ void FixQEqReaxKokkos<DeviceType>::cg_solve2()
   F_FLOAT sig_new = dot_sqr;
 
   int loop;
-  for (loop = 1; (loop < imax) && (sqrt(sig_new)/b_norm > tolerance); loop++) {
+  for (loop = 1; (loop < imax) && (Kokkos::Experimental::sqrt(sig_new)/b_norm > tolerance); loop++) {
 
     // comm->forward_comm_fix(this); //Dist_vector( d );
     pack_flag = 1;
@@ -974,7 +974,7 @@ void FixQEqReaxKokkos<DeviceType>::cg_solve2()
   if (loop >= imax && comm->me == 0) {
     char str[128];
     sprintf(str,"Fix qeq/reax cg_solve2 convergence failed after %d iterations "
-            "at " BIGINT_FORMAT " step: %f",loop,update->ntimestep,sqrt(sig_new)/b_norm);
+            "at " BIGINT_FORMAT " step: %f",loop,update->ntimestep,Kokkos::Experimental::sqrt(sig_new)/b_norm);
     error->warning(FLERR,str);
     //error->all(FLERR,str);
   }

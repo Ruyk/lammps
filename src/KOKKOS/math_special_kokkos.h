@@ -29,15 +29,15 @@ namespace MathSpecialKokkos {
   // fast 2**x function without argument checks for little endian CPUs
   extern double exp2_x86(double x);
 
-  // scaled error function complement exp(x*x)*erfc(x) for coul/long styles
+  // scaled error function complement Kokkos::Experimental::exp(x*x)*erfc(x) for coul/long styles
 
   static inline double my_erfcx(const double x)
   {
     if (x >= 0.0) return erfcx_y100(400.0/(4.0+x));
-    else return 2.0*exp(x*x) - erfcx_y100(400.0/(4.0-x));
+    else return 2.0*Kokkos::Experimental::exp(x*x) - erfcx_y100(400.0/(4.0-x));
   }
 
-  // exp(-x*x) for coul/long styles
+  // Kokkos::Experimental::exp(-x*x) for coul/long styles
 
   static inline double expmsq(double x)
   {
@@ -50,20 +50,20 @@ namespace MathSpecialKokkos {
 #endif
   }
 
-  // x**2, use instead of pow(x,2.0)
+  // x**2, use instead of Kokkos::Experimental::pow(x,2.0)
   KOKKOS_INLINE_FUNCTION
   static double square(const double &x) { return x*x; }
 
-  // x**3, use instead of pow(x,3.0)
+  // x**3, use instead of Kokkos::Experimental::pow(x,3.0)
   KOKKOS_INLINE_FUNCTION
   static double cube(const double &x) { return x*x*x; }
 
-  // return -1.0 for odd n, 1.0 for even n, like pow(-1.0,n)
+  // return -1.0 for odd n, 1.0 for even n, like Kokkos::Experimental::pow(-1.0,n)
   KOKKOS_INLINE_FUNCTION
   static double powsign(const int n) { return (n & 1) ? -1.0 : 1.0; }
 
-  // optimized version of pow(x,n) with n being integer
-  // up to 10x faster than pow(x,y)
+  // optimized version of Kokkos::Experimental::pow(x,n) with n being integer
+  // up to 10x faster than Kokkos::Experimental::pow(x,y)
 
   KOKKOS_INLINE_FUNCTION
   static double powint(const double &x, const int n) {
@@ -79,7 +79,7 @@ namespace MathSpecialKokkos {
     return (n > 0) ? yy : 1.0/yy;
   }
 
-  // optimized version of (sin(x)/x)**n with n being a _positive_ integer
+  // optimized version of (Kokkos::Experimental::sin(x)/x)**n with n being a _positive_ integer
 
   KOKKOS_INLINE_FUNCTION
   static double powsinxx(const double &x, int n) {
@@ -87,7 +87,7 @@ namespace MathSpecialKokkos {
 
     if (x == 0.0) return 1.0;
 
-    ww = sin(x)/x;
+    ww = Kokkos::Experimental::sin(x)/x;
 
     for (yy = 1.0; n != 0; n >>= 1, ww *=ww)
       if (n & 1) yy *= ww;

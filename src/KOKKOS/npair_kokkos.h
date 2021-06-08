@@ -367,9 +367,9 @@ class NeighborKokkosExecute
 
   KOKKOS_INLINE_FUNCTION
   int minimum_image_check(double dx, double dy, double dz) const {
-    if (xperiodic && fabs(dx) > xprd_half) return 1;
-    if (yperiodic && fabs(dy) > yprd_half) return 1;
-    if (zperiodic && fabs(dz) > zprd_half) return 1;
+    if (xperiodic && Kokkos::Experimental::fabs(dx) > xprd_half) return 1;
+    if (yperiodic && Kokkos::Experimental::fabs(dy) > yprd_half) return 1;
+    if (zperiodic && Kokkos::Experimental::fabs(dz) > zprd_half) return 1;
     return 0;
   }
 

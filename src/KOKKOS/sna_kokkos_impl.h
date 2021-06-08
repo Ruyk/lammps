@@ -369,7 +369,7 @@ void SNAKokkos<DeviceType, real_type, vector_length>::compute_cayley_klein(const
   const auto y = rij(iatom,jnbor,1);
   const auto z = rij(iatom,jnbor,2);
   const auto rsq = x * x + y * y + z * z;
-  const auto r = sqrt(rsq);
+  const auto r = Kokkos::Experimental::sqrt(rsq);
   const auto rcut = rcutij(iatom, jnbor);
   const auto rscale0 = rfac0 * static_cast<real_type>(MY_PI) / (rcut - rmin0);
   const auto theta0 = (r - rmin0) * rscale0;
@@ -389,7 +389,7 @@ void SNAKokkos<DeviceType, real_type, vector_length>::compute_cayley_klein(const
   const auto uy = y * rinv;
   const auto uz = z * rinv;
 
-  const auto r0inv = static_cast<real_type>(1.0) / sqrt(r * r + z0 * z0);
+  const auto r0inv = static_cast<real_type>(1.0) / Kokkos::Experimental::sqrt(r * r + z0 * z0);
 
   const complex a = { z0 * r0inv, -z * r0inv };
   const complex b = { r0inv * y, -r0inv * x };
@@ -1168,7 +1168,7 @@ void SNAKokkos<DeviceType, real_type, vector_length>::compute_ui_cpu(const typen
   y = rij(iatom,jnbor,1);
   z = rij(iatom,jnbor,2);
   rsq = x * x + y * y + z * z;
-  r = sqrt(rsq);
+  r = Kokkos::Experimental::sqrt(rsq);
 
   theta0 = (r - rmin0) * rfac0 * MY_PI / (rcutij(iatom,jnbor) - rmin0);
   //    theta0 = (r - rmin0) * rscale0;
@@ -1468,7 +1468,7 @@ void SNAKokkos<DeviceType, real_type, vector_length>::compute_duidrj_cpu(const t
   y = rij(iatom,jnbor,1);
   z = rij(iatom,jnbor,2);
   rsq = x * x + y * y + z * z;
-  r = sqrt(rsq);
+  r = Kokkos::Experimental::sqrt(rsq);
   auto rscale0 = rfac0 * static_cast<real_type>(MY_PI) / (rcutij(iatom,jnbor) - rmin0);
   theta0 = (r - rmin0) * rscale0;
   sincos_wrapper(theta0, &sn, &cs);
@@ -1595,7 +1595,7 @@ void SNAKokkos<DeviceType, real_type, vector_length>::compute_uarray_cpu(const t
 
   // compute Cayley-Klein parameters for unit quaternion
 
-  r0inv = static_cast<real_type>(1.0) / sqrt(r * r + z0 * z0);
+  r0inv = static_cast<real_type>(1.0) / Kokkos::Experimental::sqrt(r * r + z0 * z0);
   a_r = r0inv * z0;
   a_i = -r0inv * z;
   b_r = r0inv * y;
@@ -1693,7 +1693,7 @@ void SNAKokkos<DeviceType, real_type, vector_length>::compute_duarray_cpu(const 
   real_type uy = y * rinv;
   real_type uz = z * rinv;
 
-  r0inv = 1.0 / sqrt(r * r + z0 * z0);
+  r0inv = 1.0 / Kokkos::Experimental::sqrt(r * r + z0 * z0);
   a_r = z0 * r0inv;
   a_i = -z * r0inv;
   b_r = y * r0inv;
@@ -2039,7 +2039,7 @@ inline
 double SNAKokkos<DeviceType, real_type, vector_length>::deltacg(int j1, int j2, int j)
 {
   double sfaccg = factorial((j1 + j2 + j) / 2 + 1);
-  return sqrt(factorial((j1 + j2 - j) / 2) *
+  return Kokkos::Experimental::sqrt(factorial((j1 + j2 - j) / 2) *
               factorial((j1 - j2 + j) / 2) *
               factorial((-j1 + j2 + j) / 2) / sfaccg);
 }
@@ -2098,7 +2098,7 @@ void SNAKokkos<DeviceType, real_type, vector_length>::init_clebsch_gordan()
 
             cc2 = 2 * m - j;
             dcg = deltacg(j1, j2, j);
-            sfaccg = sqrt(factorial((j1 + aa2) / 2) *
+            sfaccg = Kokkos::Experimental::sqrt(factorial((j1 + aa2) / 2) *
                           factorial((j1 - aa2) / 2) *
                           factorial((j2 + bb2) / 2) *
                           factorial((j2 - bb2) / 2) *
@@ -2126,7 +2126,7 @@ void SNAKokkos<DeviceType, real_type, vector_length>::init_rootpqarray()
   auto h_rootpqarray = Kokkos::create_mirror_view(rootpqarray);
   for (int p = 1; p <= twojmax; p++)
     for (int q = 1; q <= twojmax; q++)
-      h_rootpqarray(p,q) = static_cast<real_type>(sqrt(static_cast<double>(p)/q));
+      h_rootpqarray(p,q) = static_cast<real_type>(Kokkos::Experimental::sqrt(static_cast<double>(p)/q));
   Kokkos::deep_copy(rootpqarray,h_rootpqarray);
 }
 
@@ -2169,7 +2169,7 @@ real_type SNAKokkos<DeviceType, real_type, vector_length>::compute_sfac(real_typ
     else if (r > rcut) return zero;
     else {
       auto rcutfac = static_cast<real_type>(MY_PI) / (rcut - rmin0);
-      return onehalf * (cos((r - rmin0) * rcutfac) + one);
+      return onehalf * (Kokkos::Experimental::cos((r - rmin0) * rcutfac) + one);
     }
   }
   return zero;
@@ -2189,7 +2189,7 @@ real_type SNAKokkos<DeviceType, real_type, vector_length>::compute_dsfac(real_ty
     else if (r > rcut) return zero;
     else {
       auto rcutfac = static_cast<real_type>(MY_PI) / (rcut - rmin0);
-      return -onehalf * sin((r - rmin0) * rcutfac) * rcutfac;
+      return -onehalf * Kokkos::Experimental::sin((r - rmin0) * rcutfac) * rcutfac;
     }
   }
   return zero;

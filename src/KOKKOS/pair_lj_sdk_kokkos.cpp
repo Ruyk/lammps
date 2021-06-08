@@ -157,7 +157,7 @@ compute_fpair(const F_FLOAT& rsq, const int& i, const int&j, const int& itype, c
 
   } else if (ljt == LJ9_6) {
 
-    const F_FLOAT r3inv = r2inv*sqrt(r2inv);
+    const F_FLOAT r3inv = r2inv*Kokkos::Experimental::sqrt(r2inv);
     const F_FLOAT r6inv = r3inv*r3inv;
     return r6inv*(lj_1*r3inv - lj_2) * r2inv;
 
@@ -171,7 +171,7 @@ compute_fpair(const F_FLOAT& rsq, const int& i, const int&j, const int& itype, c
   const F_FLOAT r4inv=r2inv*r2inv;
   const F_FLOAT r6inv=r2inv*r4inv;
   const F_FLOAT a = ljt==LJ12_4?r4inv:r6inv;
-  const F_FLOAT b = ljt==LJ12_4?r4inv:(ljt==LJ9_6?1.0/sqrt(r2inv):r2inv);
+  const F_FLOAT b = ljt==LJ12_4?r4inv:(ljt==LJ9_6?1.0/Kokkos::Experimental::sqrt(r2inv):r2inv);
   return a* ( lj_1*r6inv*b - lj_2 * r2inv);
 }
 
@@ -195,7 +195,7 @@ compute_evdwl(const F_FLOAT& rsq, const int& i, const int&j, const int& itype, c
     return r4inv*(lj_3*r4inv*r4inv - lj_4) - offset;
 
   } else if (ljt == LJ9_6) {
-    const F_FLOAT r3inv = r2inv*sqrt(r2inv);
+    const F_FLOAT r3inv = r2inv*Kokkos::Experimental::sqrt(r2inv);
     const F_FLOAT r6inv = r3inv*r3inv;
     return r6inv*(lj_3*r3inv - lj_4) - offset;
 

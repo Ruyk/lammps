@@ -93,8 +93,8 @@ int MinCGKokkos::iterate(int maxiter)
 
     // energy tolerance criterion
 
-    if (fabs(ecurrent-eprevious) <
-        update->etol * 0.5*(fabs(ecurrent) + fabs(eprevious) + EPS_ENERGY))
+    if (Kokkos::Experimental::fabs(ecurrent-eprevious) <
+        update->etol * 0.5*(Kokkos::Experimental::fabs(ecurrent) + Kokkos::Experimental::fabs(eprevious) + EPS_ENERGY))
       return ETOL;
 
     // force tolerance criterion

@@ -119,11 +119,11 @@
     }while(0)
 */
 
-#define KISS_FFT_COS(phase) (FFT_SCALAR) cos(phase)
-#define KISS_FFT_SIN(phase) (FFT_SCALAR) sin(phase)
+#define KISS_FFT_COS(phase) (FFT_SCALAR) Kokkos::Experimental::cos(phase)
+#define KISS_FFT_SIN(phase) (FFT_SCALAR) Kokkos::Experimental::sin(phase)
 #define HALF_OF(x) ((x)*.5)
 
-#define  kf_cexp(x,x_index,phase) \
+#define  kf_Kokkos::Experimental::cexp(x,x_index,phase) \
         do{ \
                 (x)(x_index).re = KISS_FFT_COS(phase);\
                 (x)(x_index).im = KISS_FFT_SIN(phase);\
@@ -456,7 +456,7 @@ class KissFFTKokkos {
   {
       int p=4, nf=0;
       double floor_sqrt;
-      floor_sqrt = floor( sqrt((double)n) );
+      floor_sqrt = floor( Kokkos::Experimental::sqrt((double)n) );
       int facbuf_count = 0;
       int p_max = 0;
 
@@ -505,7 +505,7 @@ class KissFFTKokkos {
 
           for (i=0;i<nfft;++i) {
               const double phase = (st.inverse ? 2.0*M_PI:-2.0*M_PI)*i / nfft;
-              kf_cexp(k_twiddles.h_view,i,phase );
+              kf_Kokkos::Experimental::cexp(k_twiddles.h_view,i,phase );
           }
 
           int p_max = kf_factor(nfft,k_factors.h_view);
