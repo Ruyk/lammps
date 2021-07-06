@@ -97,8 +97,8 @@ void PairTersoffKokkos<DeviceType>::init_style()
   neighbor->requests[irequest]->
     kokkos_device = std::is_same<DeviceType,LMPDeviceType>::value;
 
-  if (neighflag == FULL)
-    error->all(FLERR,"Cannot (yet) use full neighbor list style with tersoff/kk");
+  // if (neighflag == FULL)
+  //   error->all(FLERR,"Cannot (yet) use full neighbor list style with tersoff/kk");
 
   if (neighflag == FULL || neighflag == HALF || neighflag == HALFTHREAD) {
   //if (neighflag == FULL || neighflag == HALFTHREAD) {
