@@ -92,30 +92,30 @@ class Pointers {
 
  protected:
   LAMMPS *lmp;
-  Memory *&memory;
-  Error *&error;
-  Universe *&universe;
-  Input *&input;
+  Memory *memory;
+  Error *error;
+  Universe *universe;
+  Input *input;
 
-  Atom *&atom;
-  Update *&update;
-  Neighbor *&neighbor;
-  Comm *&comm;
-  Domain *&domain;
-  Force *&force;
-  Modify *&modify;
-  Group *&group;
-  Output *&output;
-  Timer *&timer;
+  Atom *atom;
+  Update *update;
+  Neighbor *neighbor;
+  Comm *comm;
+  Domain *domain;
+  Force *force;
+  Modify *modify;
+  Group *group;
+  Output *output;
+  Timer *timer;
 
-  MPI_Comm &world;
-  FILE *&infile;
-  FILE *&screen;
-  FILE *&logfile;
+  MPI_Comm world;
+  FILE *infile;
+  FILE *screen;
+  FILE *logfile;
 
-  class AtomKokkos *&atomKK;
-  class MemoryKokkos *&memoryKK;
-  class Python *&python;
+  class AtomKokkos *atomKK;
+  class MemoryKokkos *memoryKK;
+  class Python *python;
 };
 
 }
