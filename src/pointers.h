@@ -63,59 +63,162 @@ template <class T> class MyPage;
  * constructor instead only initializes C++ references to component
  * pointer in the LAMMPS class. */
 
+// get rid of all the references so we can compile this with offload
+// compiler. The device better not actually use any of them.
+
+class Pointers;
+
+template <typename Return, typename Containing, Return &(Containing::* get)()>
+struct proxy
+{
+   Containing *cp;
+   proxy(Containing& c) : cp(&c) {}
+   operator Return() { return ((*cp).*get)(); }
+   Return &operator=(Return r) { return ((*cp).*get)() = r; }
+   Return operator->() const { return ((*cp).*get)(); }
+};
+
+struct atomproxy
+{
+    typedef Atom *AtomPtr;
+    AtomPtr *atomptr;
+    atomproxy(AtomPtr &a) : atomptr(&a) {};
+    operator AtomPtr() { return (*atomptr); }
+    AtomPtr operator->() const { return (*atomptr); }
+    operator AtomKokkos *() const { return (AtomKokkos *)(*atomptr); }
+    AtomPtr& operator=(AtomKokkos *a) { return (*atomptr) = (Atom *)a; }
+};
+struct memoryproxy
+{
+    typedef Memory *MemoryPtr;
+    MemoryPtr *memoryptr;
+    memoryproxy(MemoryPtr &a) : memoryptr(&a) {};
+    operator MemoryPtr() { return (*memoryptr); }
+    MemoryPtr operator->() const { return (*memoryptr); }
+    operator MemoryKokkos *() const { return (MemoryKokkos *)(*memoryptr); }
+};
+
+class NeighborKokkos;
+struct neighborproxy
+{
+    typedef Neighbor *NeighborPtr;
+    NeighborPtr *neighborptr;
+    neighborproxy(NeighborPtr &a) : neighborptr(&a) {};
+    operator NeighborPtr() { return (*neighborptr); }
+    NeighborPtr operator->() const { return (*neighborptr); }
+    operator NeighborKokkos *() const
+        { return (NeighborKokkos *)(*neighborptr); }
+};
+
+class DomainKokkos;
+struct domainproxy
+{
+    typedef Domain *DomainPtr;
+    DomainPtr *domainptr;
+    domainproxy(DomainPtr &a) : domainptr(&a) {};
+    operator DomainPtr() { return (*domainptr); }
+    DomainPtr operator->() const { return (*domainptr); }
+    operator DomainKokkos *() const
+        { return (DomainKokkos *)(*domainptr); }
+};
+
+class CommKokkos;
+class CommBrick;
+class CommTiled;
+struct commproxy
+{
+    typedef Comm *CommPtr;
+    CommPtr *commptr;
+    commproxy(CommPtr &a) : commptr(&a) {};
+    operator CommPtr() { return (*commptr); }
+    CommPtr operator->() const { return (*commptr); }
+    operator CommBrick *() const
+        { return (CommBrick *)(*commptr); }
+    operator CommTiled *() const
+        { return (CommTiled *)(*commptr); }
+    operator CommKokkos *() const
+        { return (CommKokkos *)(*commptr); }
+};
+
+
 class Pointers {
+  Error *&get_error() { return lmp->error; }
+  Universe *&get_universe() { return lmp->universe; }
+  Input *&get_input() { return lmp->input; }
+
+  Update *&get_update() { return lmp->update; }
+  Force *&get_force() { return lmp->force; }
+  Modify *&get_modify() { return lmp->modify; }
+  Group *&get_group() { return lmp->group; }
+  Output *&get_output() { return lmp->output; }
+  Timer *&get_timer() { return lmp->timer; }
+
+  MPI_Comm &get_world() { return lmp->world; }
+  FILE *&get_infile() { return lmp->infile; }
+  FILE *&get_screen() { return lmp->screen; }
+  FILE *&get_logfile() { return lmp->logfile; }
+
+  class AtomKokkos *&get_atomKK() { return lmp->atomKK; }
+  class MemoryKokkos *&get_memoryKK() { return lmp->memoryKK; }
+  class Python *&get_python() { return lmp->python; }
+
  public:
-  Pointers(LAMMPS *ptr) :
-    lmp(ptr),
+  Pointers(LAMMPS *ptr) : lmp(ptr),
     memory(ptr->memory),
-    error(ptr->error),
-    universe(ptr->universe),
-    input(ptr->input),
+    error(*this),
+    universe(*this),
+    input(*this),
+
     atom(ptr->atom),
-    update(ptr->update),
+    update(*this),
     neighbor(ptr->neighbor),
     comm(ptr->comm),
     domain(ptr->domain),
-    force(ptr->force),
-    modify(ptr->modify),
-    group(ptr->group),
-    output(ptr->output),
-    timer(ptr->timer),
-    world(ptr->world),
-    infile(ptr->infile),
-    screen(ptr->screen),
-    logfile(ptr->logfile),
-    atomKK(ptr->atomKK),
-    memoryKK(ptr->memoryKK),
-    python(ptr->python) {}
+    force(*this),
+    modify(*this),
+    group(*this),
+    output(*this),
+    timer(*this),
+
+    world(*this),
+    infile(*this),
+    screen(*this),
+    logfile(*this),
+
+    atomKK(*this),
+    memoryKK(*this),
+    python(*this) {}
+
   virtual ~Pointers() {}
 
  protected:
   LAMMPS *lmp;
-  Memory *&memory;
-  Error *&error;
-  Universe *&universe;
-  Input *&input;
+  memoryproxy memory;
+  proxy<Error *, Pointers, &Pointers::get_error>  error;
+  proxy<Universe *, Pointers, &Pointers::get_universe> universe;
+  proxy<Input *, Pointers, &Pointers::get_input> input;
 
-  Atom *&atom;
-  Update *&update;
-  Neighbor *&neighbor;
-  Comm *&comm;
-  Domain *&domain;
-  Force *&force;
-  Modify *&modify;
-  Group *&group;
-  Output *&output;
-  Timer *&timer;
+  atomproxy atom;
+  proxy<Update *, Pointers, &Pointers::get_update> update;
+  neighborproxy neighbor;
+  commproxy comm;
+  //proxy<Comm *, Pointers, &Pointers::get_comm> comm;
+  //proxy<Domain *, Pointers, &Pointers::get_domain> domain;
+  domainproxy domain;
+  proxy<Force *, Pointers, &Pointers::get_force> force;
+  proxy<Modify *, Pointers, &Pointers::get_modify> modify;
+  proxy<Group *, Pointers, &Pointers::get_group> group;
+  proxy<Output *, Pointers, &Pointers::get_output> output;
+  proxy<Timer *, Pointers, &Pointers::get_timer> timer;
 
-  MPI_Comm &world;
-  FILE *&infile;
-  FILE *&screen;
-  FILE *&logfile;
+  proxy<MPI_Comm, Pointers, &Pointers::get_world> world;
+  proxy<FILE *, Pointers, &Pointers::get_infile> infile;
+  proxy<FILE *, Pointers, &Pointers::get_screen> screen;
+  proxy<FILE *, Pointers, &Pointers::get_logfile> logfile;
 
-  class AtomKokkos *&atomKK;
-  class MemoryKokkos *&memoryKK;
-  class Python *&python;
+  proxy<class AtomKokkos *, Pointers, &Pointers::get_atomKK> atomKK;
+  proxy<class MemoryKokkos *, Pointers, &Pointers::get_memoryKK> memoryKK;
+  proxy<class Python *, Pointers, &Pointers::get_python> python;
 };
 
 }
