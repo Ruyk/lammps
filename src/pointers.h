@@ -87,15 +87,19 @@ struct atomproxy
     AtomPtr operator->() const { return (*atomptr); }
     operator AtomKokkos *() const { return (AtomKokkos *)(*atomptr); }
     AtomPtr& operator=(AtomKokkos *a) { return (*atomptr) = (Atom *)a; }
+    AtomPtr& operator=(Atom *a) { return (*atomptr) = a; }
 };
 struct memoryproxy
 {
     typedef Memory *MemoryPtr;
     MemoryPtr *memoryptr;
     memoryproxy(MemoryPtr &a) : memoryptr(&a) {};
-    operator MemoryPtr() { return (*memoryptr); }
+    //operator MemoryPtr() { return (*memoryptr); }
     MemoryPtr operator->() const { return (*memoryptr); }
     operator MemoryKokkos *() const { return (MemoryKokkos *)(*memoryptr); }
+    operator Memory *() const { return (*memoryptr); }
+    MemoryPtr& operator=(MemoryKokkos *a)
+        { return (*memoryptr) = (Memory *)a; }
 };
 
 class NeighborKokkos;
@@ -138,6 +142,15 @@ struct commproxy
         { return (CommTiled *)(*commptr); }
     operator CommKokkos *() const
         { return (CommKokkos *)(*commptr); }
+    CommPtr& operator=(CommTiled *a) { return (*commptr) = (Comm *)a; }
+    CommPtr& operator=(CommBrick *a) { return (*commptr) = (Comm *)a; }
+};
+struct worldproxy
+{
+    typedef MPI_Comm *WorldPtr;
+    WorldPtr worldptr;
+    worldproxy(MPI_Comm &a) : worldptr(&a) {}
+    operator MPI_Comm() const { return *worldptr; }
 };
 
 
@@ -153,7 +166,7 @@ class Pointers {
   Output *&get_output() { return lmp->output; }
   Timer *&get_timer() { return lmp->timer; }
 
-  MPI_Comm &get_world() { return lmp->world; }
+  //MPI_Comm &get_world() { return lmp->world; }
   FILE *&get_infile() { return lmp->infile; }
   FILE *&get_screen() { return lmp->screen; }
   FILE *&get_logfile() { return lmp->logfile; }
@@ -180,7 +193,8 @@ class Pointers {
     output(*this),
     timer(*this),
 
-    world(*this),
+    //world(*this),
+    world(ptr->world),
     infile(*this),
     screen(*this),
     logfile(*this),
@@ -211,7 +225,8 @@ class Pointers {
   proxy<Output *, Pointers, &Pointers::get_output> output;
   proxy<Timer *, Pointers, &Pointers::get_timer> timer;
 
-  proxy<MPI_Comm, Pointers, &Pointers::get_world> world;
+  worldproxy world;
+  //proxy<MPI_Comm, Pointers, &Pointers::get_world> world;
   proxy<FILE *, Pointers, &Pointers::get_infile> infile;
   proxy<FILE *, Pointers, &Pointers::get_screen> screen;
   proxy<FILE *, Pointers, &Pointers::get_logfile> logfile;

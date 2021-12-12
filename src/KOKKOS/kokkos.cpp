@@ -82,7 +82,7 @@ KokkosLMP::KokkosLMP(LAMMPS *lmp, int narg, char **arg) : Pointers(lmp)
   forward_fix_comm_changed = 0;
   reverse_comm_changed = 0;
 
-  delete memory;
+  delete (Memory*)memory;
   memory = new MemoryKokkos(lmp);
   memoryKK = (MemoryKokkos*) memory;
 
