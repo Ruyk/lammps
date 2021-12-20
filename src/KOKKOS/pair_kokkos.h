@@ -744,31 +744,16 @@ EV_FLOAT pair_compute_neighlist (PairStyle* fpair, typename std::enable_if<(NEIG
     int vector_length = 8;
     int atoms_per_team = 32;
 
-    if (fpair->atom->ntypes > MAX_TYPES_STACKPARAMS) {
       PairComputeFunctor<PairStyle,NEIGHFLAG,false,Specialisation > ff(fpair,list);
       atoms_per_team = GetTeamSize(ff, list->inum, (fpair->eflag || fpair->vflag), atoms_per_team, vector_length);
       Kokkos::TeamPolicy<Kokkos::IndexType<int> > policy(list->inum,atoms_per_team,vector_length);
       if (fpair->eflag || fpair->vflag) Kokkos::parallel_reduce(policy,ff,ev);
       else                              Kokkos::parallel_for(policy,ff);
-    } else {
-      PairComputeFunctor<PairStyle,NEIGHFLAG,true,Specialisation > ff(fpair,list);
-      atoms_per_team = GetTeamSize(ff, list->inum, (fpair->eflag || fpair->vflag), atoms_per_team, vector_length);
-      Kokkos::TeamPolicy<Kokkos::IndexType<int> > policy(list->inum,atoms_per_team,vector_length);
-      if (fpair->eflag || fpair->vflag) Kokkos::parallel_reduce(policy,ff,ev);
-      else                              Kokkos::parallel_for(policy,ff);
-    }
   } else {
-    if (fpair->atom->ntypes > MAX_TYPES_STACKPARAMS) {
       PairComputeFunctor<PairStyle,NEIGHFLAG,false,Specialisation > ff(fpair,list);
       if (fpair->eflag || fpair->vflag) Kokkos::parallel_reduce(list->inum,ff,ev);
       else                              Kokkos::parallel_for(list->inum,ff);
       ff.contribute();
-    } else {
-      PairComputeFunctor<PairStyle,NEIGHFLAG,true,Specialisation > ff(fpair,list);
-      if (fpair->eflag || fpair->vflag) Kokkos::parallel_reduce(list->inum,ff,ev);
-      else                              Kokkos::parallel_for(list->inum,ff);
-      ff.contribute();
-    }
   }
   return ev;
 }
